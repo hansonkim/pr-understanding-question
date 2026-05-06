@@ -1,12 +1,12 @@
 # pr-understanding-question
 
-An AI agent skill that runs an interactive PR understanding check — generates context-aware questions from a PR, presents them one at a time, waits for the developer's answers, then evaluates each answer against the PR facts.
+An AI agent skill that runs an interactive PR understanding check — generates context-aware questions from a PR, presents them one at a time, waits for the reviewer's answers, then evaluates whether the reviewer understood the change well enough to approve it.
 
 ## Why this exists
 
-Standard PR review gives feedback on code quality. This skill does something different: it checks whether the **developer** actually understands their own change.
+Standard PR review focuses on what the code does. This skill focuses on a different question: does the **reviewer** actually understand the PR well enough to approve it responsibly?
 
-A PR can look clean, and the developer who wrote it may still be unable to answer:
+A PR can look clean, and the reviewer who approves it may still be unable to explain:
 
 - Why this design was chosen over alternatives
 - What fails if the external dependency goes down
@@ -22,12 +22,12 @@ The skill runs as a conversation, not a one-shot output.
 ```
 1. Provide PR context: title, description, diff, known risks, design notes
 2. The skill generates 3–7 targeted questions internally, keeping the answer rubric hidden
-3. Questions are presented one at a time — developer answers before the next appears
+3. Questions are presented one at a time — reviewer answers before the next appears
 4. After all answers are collected, each is evaluated against the PR facts
 5. Evaluation gives a 0–4 score, specific gaps, and a focused follow-up question
 ```
 
-### What the developer sees (per question)
+### What each question looks like
 
 ```
 ## Question 2 / 5: Behavior when Redis is unavailable
@@ -45,7 +45,7 @@ Before this PR, a Redis failure would not affect /v2/location/history.
 After this PR, what happens when Redis goes down, and what was the reasoning behind accepting that impact?
 ```
 
-The answer rubric ("Good answer should include") is hidden until evaluation. Revealing it before the developer answers defeats the purpose.
+The answer rubric ("Good answer should include") is hidden until evaluation. Revealing it before answering defeats the purpose.
 
 ### What evaluation looks like
 
@@ -73,7 +73,7 @@ Did you verify that the Redis availability SLA is sufficient to meet this API's 
 
 ## Question generation principles
 
-Questions are generated from the gap between what the PR changes and what the developer must be able to explain:
+Questions are generated from the gap between what the PR changes and what the reviewer must be able to explain before approving:
 
 - **Design decisions** — why this approach, what alternatives were rejected
 - **Responsibility movement** — which callers are now affected, what bypass risk exists
@@ -117,7 +117,7 @@ Copy `SKILL.md` and `references/heuristics.md` into your skills directory.
 Trigger with natural language after providing PR context:
 
 ```
-Review this PR for understanding gaps: [paste PR content]
+Check my understanding of this PR: [paste PR content]
 ```
 
 ```
