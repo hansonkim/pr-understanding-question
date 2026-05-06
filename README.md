@@ -6,7 +6,7 @@ An AI agent skill that runs an interactive PR understanding check — generates 
 
 Standard PR review gives feedback on code quality. This skill does something different: it checks whether the **developer** actually understands their own change.
 
-A PR can look clean and still be approved by someone who cannot answer:
+A PR can look clean, and the developer who wrote it may still be unable to answer:
 
 - Why this design was chosen over alternatives
 - What fails if the external dependency goes down
