@@ -2,16 +2,16 @@
 name: pr-understanding-question
 description: >
   Generates context-aware understanding questions from a PR, design notes, and code changes to verify
-  whether a developer truly understands the why, trade-offs, risks, and behavior of their changes.
-  Runs as an interactive conversation: presents questions, waits for answers, then evaluates.
+  whether the reviewer truly understands the why, trade-offs, risks, and behavior of the changes
+  before approving. Runs as an interactive conversation: presents questions, waits for the reviewer's
+  answers, then evaluates each answer against the PR facts.
 
   Use this skill whenever:
-  - A user shares a PR (link, diff, description, or code changes) and wants review questions generated
-  - A user wants to quiz or interview a developer about their PR to verify understanding
-  - A user wants to check if answers about a PR are accurate and complete
-  - A user says "generate questions for this PR", "quiz the dev on this change", "evaluate this answer"
+  - A reviewer wants to verify their own understanding of a PR before approving it
+  - A user shares a PR (link, diff, description, or code changes) and wants understanding questions generated
+  - A user says "check my understanding of this PR", "generate questions for this PR", "quiz me on this change"
+  - A user wants to evaluate whether their answers about a PR are accurate and complete
   - A code review process needs structured questions to probe design decisions, risks, or trade-offs
-  - A tech lead wants to assess whether a developer owns their PR before approving it
 
   Do NOT trigger for: general code review feedback, summarizing a PR, writing a PR description.
 ---
@@ -19,10 +19,10 @@ description: >
 # PR Understanding Question
 
 This skill runs an interactive understanding check for a PR. It generates targeted questions,
-waits for the developer's answers, then evaluates them against the PR facts.
+waits for the reviewer's answers, then evaluates them against the PR facts.
 
 The goal is not to summarize the PR.
-The goal is to verify whether the developer understands:
+The goal is to verify whether the reviewer understands the PR well enough to approve it:
 - why the change exists
 - what design decisions were made
 - what risks were accepted
@@ -65,7 +65,7 @@ Internally prepare 3–7 questions. Each question has two parts:
 
 Questions are asked one by one. Do NOT output all questions at once.
 
-For each question, output ONLY the developer-facing parts:
+For each question, output ONLY the reviewer-facing parts:
 
 ```md
 ## Question N / <total>: <title>
@@ -80,7 +80,7 @@ For each question, output ONLY the developer-facing parts:
 <1-2 sentence background>. <The actual question>?
 ```
 
-After presenting each question, stop and wait for the developer's answer before showing the next one.
+After presenting each question, stop and wait for the reviewer's answer before showing the next one.
 Do NOT output "Good answer should include" or "Evidence to check" — revealing the rubric defeats the purpose.
 
 After the final question is answered, show the **Coverage** summary:
@@ -95,7 +95,7 @@ but lacks enough information to form a precise question.
 
 ### Step 3 — Collect answers one by one
 
-After each question, wait for the developer's reply before moving to the next question.
+After each question, wait for the reviewer's reply before moving to the next question.
 When all questions are answered, proceed to evaluation.
 
 ### Step 4 — Evaluate answers (Mode B)
@@ -144,6 +144,26 @@ Better:
 
 **Make questions PR-specific.** Generic risk questions ("What are the risks?") are useless.
 Anchor every question to a specific file, function, decision, or diff in the provided PR.
+
+**Plain language.** Questions probe technical decisions, but the *language* of the question
+must be accessible. Reviewers should not have to mentally translate jargon to understand
+what is being asked.
+
+Concrete identifiers (function names, file paths, table names, ADR IDs, command names,
+specific Redis/SQL primitives the PR actually uses) stay verbatim — they are the anchors
+that make a question PR-specific and clickable.
+
+For *non-identifier* technical terms (architectural jargon, internal slang, domain abstractions),
+do one of two things:
+- Replace with everyday words when a simpler phrase fits.
+  Example: `entry severity 승격` → "응답 로그 한 건 전체의 심각도를 ERROR로 끌어올리는 동작".
+- Keep the term but inline a one-line plain-language gloss the first time it appears.
+  Example: `proxy-only subnet (Internal LB 전용으로 분리한 서브넷)`.
+
+Self-check before showing a question: "Could a teammate one or two years junior read this
+and understand what is being asked, without looking up half the words?" If not, simplify.
+The point of the question is to test the reviewer's understanding of the change, not their
+fluency in the author's vocabulary.
 
 ---
 
